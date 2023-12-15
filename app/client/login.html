@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+</head>
+    <body>
+        <h1>Autorization</h1>
+        <form class="sign-in__form" onsubmit="return checkForm()">
+            <div class="sign-in__form-item">
+                <div class="sign-in__form-item-label">Email</div>
+                <input type="text" class="sign-in__form-item-input email-input" pattern="^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$" required></input>
+            </div>
+            <div class="sign-in__form-item">
+                <div class="sign-in__form-item-label">Password</div>
+                <input type="text" class="sign-in__form-item-input password-input" required></input>
+            </div>
+            <button type="submit" class="sign-in-button">
+                <div class="sign-in-button__text">
+                  Sign in
+                </div>
+              </button>
+        </form>
+        <a href="registration">I dont have an account</a>
+        
+        <script type="text/javascript">
+            async function checkForm() {
+                try {
+                    event.preventDefault()
+                    const email = document.querySelector(".email-input").value
+                    const password = document.querySelector(".password-input").value
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({email: email, password: password})
+                    }).then(res => {
+                        return res.json()
+                    }).then(data => {
+                        return data
+                    })
+                    const data = await response
+                    if (data.message) {
+                        alert(data.message)
+                        return
+                    }
+
+                    localStorage.clear()
+                    localStorage.hash = data.token
+
+                    window.location.href = '/index';
+                }
+                catch (e) {
+                    console.log(e)
+                }
+            }
+        </script>
+    </body>
+</html>
