@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+</head>
+
+<body>
+    <h1>Autorization</h1>
+    <form class="sign-in__form" onsubmit="return checkForm()">
+        <div class="sign-in__form-item">
+            <div class="sign-in__form-item-label">Email</div>
+            <input type="text" class="sign-in__form-item-input email-input"
+                pattern="^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$" required></input>
+        </div>
+        <div class="sign-in__form-item">
+            <div class="sign-in__form-item-label">Password</div>
+            <input type="text" class="sign-in__form-item-input password-input" required></input>
+        </div>
+        <button type="submit" class="sign-in-button">
+            <div class="sign-in-button__text">
+                Sign in
+            </div>
+        </button>
+    </form>
+    <form class="code__form" style="display: none" onsubmit="return checkCode()">
+        <div class="code-item">
+            <div>Enter 4-digit code from your mailbox: </div>
+            <input type="text" class="code-input" required></input>
+        </div>
+        <button type="submit" class="sign-in-button">
+            <div class="sign-in-button__text">
+                Confirm
+            </div>
+        </button>
+    </form>
+    <a href="registration">I dont have an account</a>
+
+    <script type="text/javascript">
+        let tok
+        async function checkForm() {
+            try {
+                event.preventDefault()
+                const email = document.querySelector(".email-input").value
+                const password = document.querySelector(".password-input").value
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                }).then(res => {
+                    return res.json()
+                }).then(data => {
+                    return data
+                })
+                const data = await response
+                if (data.message) {
+                    alert(data.message)
+                    return
+                }
+
+                localStorage.clear()
+                //localStorage.hash = data.token
+                tok = data.token
+                document.querySelector('.sign-in__form').style.display = "none"
+                document.querySelector('.code__form').style.display = "block"
+                //window.location.href = '/index';
+            }
+            catch (e) {
+                console.log(e)
+            }
+        }
+        async function checkCode() {
+            event.preventDefault()
+            const email = document.querySelector(".email-input").value
+            const code = document.querySelector('.code-input').value
+            const response = await fetch('/api/auth/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email, code: code })
+            }).then(res => {
+                return res.json()
+            }).then(data => {
+                return data
+            })
+            const data = await response
+
+            if (data.message === "Success") {
+                localStorage.hash = tok
+                window.location.href = '/index'
+            }
+            else {
+                alert(data.message)
+            }
+        }
+    </script>
+</body>
+
+</html>
